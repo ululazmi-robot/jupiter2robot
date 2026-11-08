@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!-- IMU sensor on imu_link.
+
+ONE SENSOR, ONE PLUGIN. The old pair of xacros both declared an IMU here; the
+loser's block was overwritten during fixed-joint reduction.
+
+PLUGIN CHOICE: libgazebo_ros_imu_sensor.so, not libgazebo_ros_imu.so.
+The latter is the ROS 1-era plugin, deprecated in Humble, and wants
+<topicName>/<bodyName> tags this sensor does not use.
+
+THE imu NOISE BLOCK IS REQUIRED, NOT DECORATION
+Measured by bisection against gzserver 11.10:
+
+    sensor, no plugin ..................... 0 errors
+    sensor + imu_sensor plugin, no imu block  .. 6 errors   (the old state)
+    sensor + plugin + imu noise blocks ....... 0 errors
+
+The six "Get noise index not valid" lines are one per noise axis (3 angular
+velocity + 3 linear acceleration). The plugin asks the sensor for each noise
+index and the sensor has none to give. Supplying the block silences the errors
+and gives the IMU realistic noise, which a simulator should have anyway.
+
+Values below are the standard Humble defaults: 2e-4 rad/s, 1.7e-2 m/s^2.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="imu_visual" default="false"/>
+
+  <gazebo reference="imu_link">
+    <sensor type="imu" name="imu">
+      <always_on>true</always_on>
+      <update_rate>100</update_rate>
+      <visualize>$(arg imu_visual)</visualize>
+
+      <imu>
+        <angular_velocity>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>2e-4</stddev></noise></z>
+        </angular_velocity>
+        <linear_acceleration>
+          <x><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev></noise></x>
+          <y><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev></noise></y>
+          <z><noise type="gaussian"><mean>0.0</mean><stddev>1.7e-2</stddev></noise></z>
+        </linear_acceleration>
+      </imu>
+
+      <plugin name="imu_plugin" filename="libgazebo_ros_imu_sensor.so">
+        <ros>
+          <remapping>~/out:=imu</remapping>
+        </ros>
+      </plugin>
+    </sensor>
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+</robot>

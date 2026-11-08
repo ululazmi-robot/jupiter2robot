@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<robot name="robocup_bright_paper_bag_with_handle">
+
+  <!-- Main Bag Body Link (Parkson Paper Bag Original: 28cm H x 25cm W x 11cm D) -->
+  <link name="paper_bag_link">
+    <!-- Inertial properties for physics simulators (Gazebo) -->
+    <inertial>
+      <origin xyz="0.0 0.0 0.14" rpy="0 0 0"/>
+      <!-- Lightweight kraft paper bag approximation (0.12 kg) -->
+      <mass value="0.12"/>
+      <inertia ixx="0.0014" ixy="0.0" ixz="0.0" iyy="0.0009" iyz="0.0" izz="0.0007"/>
+    </inertial>
+
+    <!-- Visual Body -->
+    <visual>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://so100_description/meshes/parkson_bag_body.stl"/>
+      </geometry>
+      <material name="parkson_kraft_brown">
+        <color rgba="0.76 0.58 0.38 1.0"/>
+      </material>
+    </visual>
+
+    <!-- Collision Geometry for Bag Body -->
+    <collision>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://so100_description/meshes/parkson_bag_body.stl"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- Semicircular Twisted Paper Rope Handle Link -->
+  <link name="bag_handle_link">
+    <inertial>
+      <origin xyz="0 0 0.0675" rpy="0 0 0"/>
+      <mass value="0.01"/>
+      <inertia ixx="0.00001" ixy="0.0" ixz="0.0" iyy="0.00001" iyz="0.0" izz="0.00001"/>
+    </inertial>
+
+    <!-- Visual Smooth Semicircular Handle -->
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://so100_description/meshes/parkson_handle.stl"/>
+      </geometry>
+      <material name="kraft_rope">
+        <color rgba="0.70 0.52 0.32 1.0"/>
+      </material>
+    </visual>
+
+    <!-- Collision Geometry -->
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://so100_description/meshes/parkson_handle.stl"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="bag_handle_joint" type="continuous">
+    <parent link="paper_bag_link"/>
+    <child link="bag_handle_link"/>
+    <!-- Positioned at top rim of the bag (Z=0.28m); pivots around Y axis under gravity -->
+    <origin xyz="0.0 0.0 0.28" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <dynamics damping="0.02" friction="0.01"/>
+  </joint>
+
+  <!-- Gazebo-specific extensions for physical behavior -->
+  <gazebo reference="paper_bag_link">
+    <material>Gazebo/Wood</material>
+    <mu1>0.6</mu1>
+    <mu2>0.6</mu2>
+    <kp>100000.0</kp>
+    <kd>1.0</kd>
+    <maxVel>0.1</maxVel>
+    <minDepth>0.001</minDepth>
+    <provideFeedback>true</provideFeedback>
+  </gazebo>
+  <gazebo reference="bag_handle_link">
+    <material>Gazebo/Wood</material>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <kp>100000.0</kp>
+    <kd>1.0</kd>
+  </gazebo>
+
+</robot>

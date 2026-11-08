@@ -1,0 +1,64 @@
+<?xml version="1.0" ?>
+<!-- ===========================================================================
+   Jupiter 2 - SIMULATION AND HARDWARE ENTRY POINT
+   ===========================================================================
+
+   Geometry comes from jupiterobot2_description; everything below it (Gazebo
+   plugins, sensors, ros2_control, hardware selection) lives in THIS package.
+   That split is the point: the description package stays usable for
+   RViz/MoveIt/hardware without pulling in simulation.
+
+   TWO WAYS TO USE THIS FILE
+
+     Gazebo (simulation):
+       xacro $(find jupiterobot2_gazebo)/urdf/jupiter2_pro.gazebo.xacro
+       launch/gazebo.launch.py does this for you.
+
+     Real robot:
+       xacro .../jupiter2_pro.gazebo.xacro use_fake_hardware:=false
+       launch/hardware.launch.py does this for you.
+
+   The Gazebo plugin blocks below are INERT when you are not running Gazebo.
+   They are only read by gzserver, so loading this URDF on hardware costs
+   nothing but bytes. That is why one file serves both: the alternative was two
+   URDF variants that drift apart, and this repo has already been burned by
+   duplicate <gazebo> blocks and duplicate ros2_control blocks.
+
+   LAYERING
+       jupiter2_pro.urdf.xacro        <- base geometry, no plugins
+       urdf/plugins/diff_drive.xacro  <- /cmd_vel, /odom, wheel TF
+       urdf/plugins/surfaces.xacro    <- friction + materials, ONE block/link
+       urdf/sensors/imu.xacro         <- /imu
+       urdf/sensors/lidar.xacro       <- /scan
+       urdf/sensors/cameras.xacro     <- /camera/* and /camera_02/*
+       urdf/hardware.xacro            <- ros2_control: fake or real SO-100 bus
+       urdf/ros2_control.xacro        <- gazebo_ros2_control plugin only
+
+   Each of those declares each <gazebo reference="..."> at most once, and there
+   is exactly ONE <ros2_control> element in the whole robot (it lives in
+   hardware.xacro). Both invariants exist because breaking them produced bugs
+   that were invisible in the logs: "multiple inconsistent <mu>",
+   "Get noise index not valid", and a head joint that reported "active" while
+   ignoring every command.
+   =========================================================================== -->
+<robot name="jupiter2_pro_gazebo" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- ============ base geometry ============ -->
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/jupiter2_pro.urdf.xacro"/>
+
+  <!-- ============ physics and surface properties ============ -->
+  <xacro:include filename="$(find jupiterobot2_gazebo)/urdf/plugins/diff_drive.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_gazebo)/urdf/plugins/surfaces.xacro"/>
+
+  <!-- ============ sensors ============ -->
+  <xacro:include filename="$(find jupiterobot2_gazebo)/urdf/sensors/imu.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_gazebo)/urdf/sensors/lidar.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_gazebo)/urdf/sensors/cameras.xacro"/>
+
+  <!-- ============ ros2_control ============
+       hardware.xacro owns the single <ros2_control> element and picks the
+       backend. ros2_control.xacro only adds the Gazebo plugin that loads it. -->
+  <xacro:include filename="$(find jupiterobot2_gazebo)/urdf/hardware.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_gazebo)/urdf/ros2_control.xacro"/>
+
+</robot>

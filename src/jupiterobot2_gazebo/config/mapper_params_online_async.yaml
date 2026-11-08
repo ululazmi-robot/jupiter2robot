@@ -1,0 +1,20 @@
+slam_toolbox:
+  ros__parameters:
+    # ROS Parameters
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_link
+    scan_topic: /scan
+    use_sim_time: true
+
+    # SLAM Parameters
+    mode: mapping # mapping or localization
+    solver_plugin: solver_plugins::CeresSolver
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    
+    # Matching Parameters
+    max_laser_range: 15.0
+    minimum_travel_distance: 0.1
+    minimum_travel_heading: 0.1
+    do_loop_closing: true

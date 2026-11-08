@@ -1,0 +1,437 @@
+31/12/2025
+
+start time stamp report which done setup pnp ssd to laptop
+
+start to do 
+
+sudo apt update - done
+sudo apt upgrade - done
+
+install terminator - sudo apt install terminator - done
+
+---------------------------------------------------------------------------------
+
+install ros2 humble
+
+Set Locale (Important) - done
+
+sudo apt update
+sudo apt install -y locales
+sudo locale-gen en_US en_US.UTF-8
+sudo update-locale LC_ALL=en_US.UTF-8 LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
+
+
+Enable Required Repositories - done
+
+sudo apt install -y software-properties-common
+sudo add-apt-repository universe
+
+
+sudo apt update
+
+install ros2 humble - done
+
+sudo apt install ros-humble-desktop
+
+---------------------------------------------------------------------------------
+
+install gazebo - done
+sudo apt install ros-humble-gazebo-*
+
+
+install ros-humble-cartographer - done
+sudo apt install ros-humble-cartographer
+
+install ros-humble-cartographer-ros - done
+sudo apt install ros-humble-cartographer-ros
+
+install ros-humble-navigation2 - done
+sudo apt install ros-humble-navigation2
+
+install ros-humble-nav2-bringup - done
+sudo apt install ros-humble-nav2-bringup
+
+Install SLAM Toolbox - done
+sudo apt install ros-humble-slam-toolbox
+
+Install RTAB-Map (RGB-D SLAM) - done
+sudo apt install ros-humble-rtabmap-ros
+
+Install ros2_control - done
+sudo apt install ros-humble-ros2-control
+
+Install MoveIt 2 (Motion Planning) - done
+sudo apt install ros-humble-moveit
+
+--------------------------------------------------------------------------------------------------
+
+3/1/2026
+
+target connect to jetson 
+
+Jetson Orin Nano
+
+Interface: wlP1p1s0
+
+IP: 10.150.80.134/24
+
+Laptop
+
+Interface: wlp4s0
+
+IP: 10.150.80.249/24
+
+✔ Same subnet: 10.150.80.0/24
+✔ Same Wi-Fi
+✔ DDS multicast will work
+
+
+
+Set ROS Domain ID (Both Devices)
+echo "export ROS_DOMAIN_ID=30" >> ~/.bashrc
+source ~/.bashrc
+
+Laptop
+mkdir -p ~/.ros
+nano ~/.ros/fastdds.xml
+
+Paste this (Laptop-specific):
+<?xml version="1.0" encoding="UTF-8"?>
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <transport_descriptors>
+    <transport_descriptor>
+      <transport_id>udp_transport</transport_id>
+      <type>UDPv4</type>
+      <interfaceWhiteList>
+        <address>wlp4s0</address>
+      </interfaceWhiteList>
+    </transport_descriptor>
+  </transport_descriptors>
+
+  <participant profile_name="participant_profile" is_default_profile="true">
+    <rtps>
+      <userTransports>
+        <transport_id>udp_transport</transport_id>
+      </userTransports>
+      <useBuiltinTransports>false</useBuiltinTransports>
+    </rtps>
+  </participant>
+</profiles>
+
+done testing
+
+----------------------------------------------------------------------------------------
+
+download turtlebot
+
+based on emanual robotis
+
+# 1. Source your ROS 2 Humble environment
+source /opt/ros/humble/setup.bash
+
+# 2. Create the directory and enter it
+mkdir -p ~/turtlebot3_ws/src
+cd ~/turtlebot3_ws/src/
+
+# 3. Clone the required repositories
+git clone -b humble https://github.com/ROBOTIS-GIT/DynamixelSDK.git
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3_msgs.git
+git clone -b humble https://github.com/ROBOTIS-GIT/turtlebot3.git
+
+done download turtlebot
+
+problem gazebo
+
+-------------------------------------------------------------------------
+
+9/1/2026
+
+sudo apt upgrade - to install necestial item
+
+
+done stel install gazebo
+
+---------------------------------------------------------------------------
+
+10/1/2025
+
+start the urdf conversion - berjaya
+
+try test at rviz, it not shown
+
+---------------------------------------------------------------------------
+12/1/2025
+rviz dne
+tryy exp 1 
+coqui
+
+cd 
+exp1
+python3 experiment1_with_metrics.py
+
+
+---------------------------------------------------------------------------
+13/1/2025
+
+repair objective based on 
+
+try conduct timestamp for talker and litsener latency
+
+
+
+--------------------------------------------
+ 
+--------------------------------------------
+1/4/2026
+
+try solve spawn robot jupiter2
+
+spawn robot is solve
+install
+sudo apt update ros-humble-gazebo-ros2-control
+sudo apt install ros-humble-gazebo-ros2-control ros-humble-ros2-control ros-humble-ros2-controllers
+
+tukar xacro_gazebo untuk arm ngan head di mana from ros1 to ros 2
+tukar jupier2_gazebo.xacro to ros2
+
+berjaya spawn robot
+tulis code utk teleop 
+teleop berjaya
+update to github
+
+--------------------------------------------
+6/4/2026
+
+try build gazebo mapping - 2 mapp 
+berjaya buat based on layout robocup 2025 and 2026
+
+present ke dr apa yang dibuat
+
+--------------------------------------------
+9/4/2026
+
+start install slam toolbox
+try slamm
+berjaya
+
+
+--------------------------------------------
+11/4/2026
+
+buat template - berjaya
+write slam_rviz.launch.py
+dowload gpu checker
+install cartograph
+buat template cartograph - tak berjaya
+write jupiter2_no_odom.lua
+write carto_slam_rviz.launch.py
+
+
+--------------------------------------------
+13/4/2026
+
+start over with remove cartograph 
+
+start a new with hector graph
+done write slam_no_odom
+done write slam_no_odom_rviz
+done trial it
+done save map_no_odom
+
+
+start with acml
+failed
+
+--------------------------------------------
+14/4/2026
+
+restart spawn maps inside rviz
+done clear some error on gazebo
+
+--------------------------------------------
+20/4/2026
+
+restart spawn maps inside rviz
+happen which updated topic
+
+
+--------------------------------------------
+22/4/2026
+membuat pembelian
+ssd nvme2
+tambah 1 experiment check area 
+
+--------------------------------------------
+24/4/2026
+
+repair gazebo
+change at  for jupiter2_desricpition
+To stop this from happening every time you open a new terminal, you should edit your package.xml in your description packages.
+
+    Open ~/fyp1/src/jupiterobot2_description/package.xml.
+
+    Scroll to the bottom and find the <export> tag.
+
+    Change it to point to the folder above your models, or specify the model path correctly:
+    <export>
+  <build_type>ament_cmake</build_type>
+  <gazebo_ros gazebo_model_path="${prefix}/share"/>
+</export>
+
+for head and arm been doing the same
+
+ignore the repair(dia rosakkan lagi so kita move on)
+
+
+now i want to convert all bringup file from ros1 to ros2
+
+so now i have some issues because i do not trust with my capabilities which to convert bringup so i want to ask dr jefrey
+create file jupiterobot2_controller.yaml
+create file arm_head_bringup.launch.py
+delete the file
+
+
+--------------------------------------------
+25/4/2026
+
+sudo apt update
+sudo apt install ros-humble-turtlebot3-msgs ros-humble-turtlebot3-bringup ros-humble-robot-state-publisher ros-humble-xacro
+
+# 2. Build your Lidar driver (if you haven't already)
+cd ~/fyp1/src
+git clone https://github.com/Slamtec/sllidar_ros2.git
+cd ~/fyp1
+rosdep install --from-paths src --ignore-src -r -y
+colcon build --symlink-install --packages-select sllidar_ros2
+source install/setup.bash 
+
+Both success download
+
+
+--------------------------------------------
+29/4/2026
+
+start to robot direct
+try dual boot with external ssd - success
+try gazebo acml - success
+
+try physciall move
+
+# 1. Install Base, Publisher, and Navigation packages
+sudo apt update
+sudo apt install ros-humble-turtlebot3-msgs ros-humble-turtlebot3-bringup ros-humble-robot-state-publisher ros-humble-xacro ros-humble-navigation2 ros-humble-nav2-bringup
+
+# 2. Build your Lidar driver (if you haven't already)
+cd ~/fyp1/src
+git clone https://github.com/Slamtec/sllidar_ros2.git
+cd ~/fyp1
+rosdep install --from-paths src --ignore-src -r -y
+colcon build --symlink-install --packages-select sllidar_ros2
+source install/setup.bash
+
+robot succes move and try maping also 
+
+----------------------------------
+30/4/2026
+
+install anydesk - success
+
+we need to install dynamixel_sdk next to move servo motor
+
+done maps lab and do acml - success
+
+----------------------------------
+4/5/2026
+
+try do nav2 point A to point B
+create new package name jupiterobot2_navigation
+
+sudo apt update
+sudo apt install ros-humble-nav2-simple-commander
+
+----------------------------------
+6/5/2026
+
+write experiment first ode - done
+
+install monitoring dependencies
+pip3 install psutil pynvml
+
+install mediapipe and yolo v8
+
+done and already create node for it
+
+----------------------------------
+7/5/2026
+
+try at robot, mic not function replace with pervious one. used the old one mic
+
+
+
+-------------------------
+18/5/2026
+
+If you ever go to a different network (like home vs. university) and your IP addresses change, you only need to update the IP address inside your ~/cyclonedds.xml file. You won't have to touch the .bashrc ever again.
+
+-------------------------
+21/5/2026
+
+robot tak boleh connect to wifi - open motherboard detect yang wire ke athena terlucut, sambung balik, restart and wifi connected
+
+
+trial hardware for both experiment - done and record video
+
+
+-------------------------
+26/5/2026
+
+start experiment. create physciall map at bilik sumber. try robot again
+build the experiment area with around (3.4m x 3.6 m) - reduce to this measurement because item needed for it is limited
+
+try run single_exp there is error and battery is low. so we stop at 5.30 to charge robot
+
+-------------------------
+27/5/2026
+
+start again experiment 1. cari screw 32 *8mm
+
+-------------------------
+28/5/2026
+
+start over exp1 with new maps
+living_room - done
+kitchen 25 trial - at morning because battery low
+
+
+-------------------------
+29/5/2026
+
+finish experiment 1 with single
+kitchen around 15 trial
+bedroom 5 trial
+
+done experiment with hardware of single
+
+create new maps at gazebo name trial1_t2 but used file robocup_2024
+
+-------------------------
+31/5/2026
+
+start exp2
+
+done with living room, kitchen,study room
+
+simulation single done living room,kitchen,bedroom
+there is problem with rplidar but it just usb can't connect so change usb port  'serial_port': '/dev/ttyUSB0', to  'serial_port': '/dev/ttyUSB1', at jupiterobot2_lidar.launch
+
+-------------------------
+1/6/2026
+
+final day to test exp2 which go to bed room
+
+-------------------------
+27/6/2026
+
+makeup robot
+test it function

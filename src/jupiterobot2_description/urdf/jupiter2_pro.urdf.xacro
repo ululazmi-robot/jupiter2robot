@@ -1,0 +1,83 @@
+<?xml version="1.0" ?>
+<!-- ===========================================================================
+   Jupiter 2 - FULL ROBOT DESCRIPTION
+   ===========================================================================
+
+   THIS FILE IS PURE GEOMETRY. No Gazebo, no controllers, no simulation.
+
+   Use it for: robot_state_publisher on real hardware, RViz, MoveIt, anything
+   that just needs the kinematic tree.
+
+   For Gazebo, do NOT add plugin tags here. Use the sim entry point, which
+   includes this file and layers the Gazebo XML on top:
+
+       jupiterobot2_gazebo/urdf/jupiter2_pro.gazebo.xacro
+
+   LAYOUT
+       urdf/
+         jupiter2_pro.urdf.xacro     <- you are here
+         config/
+           properties.xacro          M_PI and other constants
+           materials.xacro           <material> colour definitions
+         robot/
+           base.xacro                chassis, wheels, casters, IMU frame
+         tower/
+           pole_macros.xacro         parametric pole_40/60/80/200/300 macros
+           plate1.xacro              camera/lidar deck + 300 mm risers
+           plate2.xacro              arm deck + 200 mm risers
+           plate3.xacro              top deck: mic, e-stop, 80 mm posts
+           monitor_frame.xacro       monitor frame_1 -> frame_2 + posts
+           head_and_monitor.xacro    head_mount_link, monitor, screen
+         sensors/
+           astra_pro_camera.urdf.xacro   Astra Pro mount + optical frames
+
+   INCLUDE ORDER MATTERS
+   1. config/* first. <xacro:property> is resolved at point of USE, so M_PI and
+      the materials must be loaded before any module that references them.
+   2. robot/ and tower/* next, in tree order. Later modules attach to links
+      declared by earlier ones (base_link -> stack_link -> plate_1 -> plate_2
+      -> plate_3), so shuffling this list produces "parent link not found".
+   3. sensors/ before tower/plate1.xacro, because plate1 CALLS the
+      sensor_camera_astra_pro macro. Defining a macro after its call site is
+      not allowed in xacro.
+   4. The arm last. so100_description is intentionally the only external
+      description this file depends on, and the dependency is one-way: that
+      package knows nothing about this one.
+
+   THE ARM
+   arm_mount_link (in tower/plate2.xacro) is an empty anchor. The SO-100
+   attaches to it via so100_description/urdf/jupiter2_so100_arm.xacro. The
+   package is named "so100", not "jupiterobot2", because the same source is
+   shared with the standalone arm workspace at ~/jupiter2_so100_deploy.
+   =========================================================================== -->
+<robot name="jupiter2_pro" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- ============ 1. configuration ============ -->
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/config/properties.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/config/materials.xacro"/>
+
+  <!-- ============ 2. chassis and tower ============ -->
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/robot/base.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/tower/pole_macros.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/sensors/astra_pro_camera.urdf.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/tower/plate1.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/tower/plate2.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/tower/plate3.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/tower/monitor_frame.xacro"/>
+  <xacro:include filename="$(find jupiterobot2_description)/urdf/tower/head_and_monitor.xacro"/>
+
+  <!-- ============ 3. head ============ -->
+  <xacro:include filename="$(find jupiterobot2_head_description)/urdf/jupiterobot2_head.urdf.xacro"/>
+
+  <!-- ============ 4. arm (SO-100) ============
+       Anchored to plate_2_link, NOT arm_mount_link. arm_mount_link is 134 mm
+       outboard and belonged to the removed AX-12 arm; using it floats the
+       SO-100 clear of the deck.
+       These two includes must stay in this order: jupiter2_so100_arm.xacro
+       defines arm_holder_link and the mount joints, then so100.urdf supplies
+       the "base" link that the mount attaches to. -->
+  <xacro:include filename="$(find so100_description)/urdf/jupiter2_so100_arm.xacro"/>
+  <xacro:include filename="$(find so100_description)/urdf/so100.urdf"/>
+  <xacro:jupiter2_so100_arm parent="plate_2_link"/>
+
+</robot>

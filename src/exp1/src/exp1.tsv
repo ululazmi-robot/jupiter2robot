@@ -1,0 +1,5 @@
+no	timestamp	recognized_text	detected_keyword	stt_latency_sec	tts_latency_sec	total_latency_sec	cpu_usage_percent	keyword_accuracy	success_flag
+1	2026-01-13 01:05:23	this even when number	none	4.817	5.775	10.592	1.35	0.0	0
+2	2026-01-13 01:05:32	and going to leaving do	none	4.274	4.94	9.214	0.5	0.0	0
+3	2026-01-13 01:05:41	i am going to leave the middle	none	4.271	4.654	8.925	0.45	0.0	0
+4	2026-01-13 01:05:50	and going to leaving it is	none	4.314	4.989	9.303	0.45	0.0	0

@@ -1,0 +1,93 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+  head_mount_link and the monitor/screen pair.
+
+  head_mount_link is an empty anchor: the head geometry lives in a separate
+  package (jupiterobot2_head_description) and is included from the top-level
+  file. Nothing in this file depends on that package.
+
+  Note: the original file had an inline comment marker here which cannot be
+  nested inside this block. XML forbids nested comments entirely.
+  -->
+
+  <joint name="head_mount_joint" type="fixed">
+    <parent link="monitor_frame_2_link"/>
+    <child link="head_mount_link"/>
+    <origin xyz="0 0 0.0475" rpy="0 0 0"/>
+  </joint>
+
+  <link name="head_mount_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/head_mount.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="DarkGrey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.13 0.024"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.005" rpy="0 0 0"/>  <!--0.04*0.12*0.01-->
+      <mass value="0.0205"/>
+      <inertia ixx="2.4770833e-05" ixy="0" ixz="0"
+               iyy="2.9041667e-06" iyz="0"
+               izz="2.7333e-05" />
+    </inertial>
+  </link>
+
+  <joint name="monitor_joint" type="fixed">
+    <parent link="monitor_frame_2_link"/>
+    <child link="monitor_link"/>
+    <origin xyz="0.0405 0 -0.046" rpy="0 0 0"/>
+  </joint>
+  <link name="monitor_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/monitor.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="FlatBlack"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/monitor.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="-0.013 0 0.005"/>  <!--0.026*0.2465*0.167-->
+      <mass value="0.48" />
+      <inertia ixx="0.00354605" ixy="0.0" ixz="0.0"
+               iyy="0.0011426" iyz="0.0"
+               izz="0.00245753" />
+    </inertial>
+  </link>
+
+  <joint name="screen_joint" type="fixed">
+    <parent link="monitor_link"/>
+    <child link="screen_link"/>
+    <origin xyz="-0.0025 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <link name="screen_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/screen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="White"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/screen.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+</robot>

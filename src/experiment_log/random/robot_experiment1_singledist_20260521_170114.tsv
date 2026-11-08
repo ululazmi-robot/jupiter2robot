@@ -1,0 +1,2 @@
+timestamp	event	cpu_%	ram_%	gpu_%	time_taken_sec	latency_sec	oneway_latency_sec	total_latency_sec
+17:01:25	DETECTED_LIVING ROOM	8.9	24.6	0.0	0.0	0.949	0.0	0.0

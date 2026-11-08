@@ -1,0 +1,3 @@
+timestamp	event	cpu_%	ram_%	gpu_%	time_taken_sec	latency_sec	oneway_latency_sec	total_latency_sec
+12:25:37	CMD_FORWARD_0.5M	9.6	24.8	0.0	0.0	0.651	0.0	0.0
+12:25:45	SUCCESS_MOVE_FORWARD_0.5_METERS	9.4	24.9	0.0	1.707	0.651	0.751	2.358

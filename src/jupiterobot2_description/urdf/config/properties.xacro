@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<!-- Shared numeric constants.
+
+M_PI lives here so no module has to define it. xacro resolves <xacro:property>
+at the point of USE, not at include time, so including this file once from the
+top-level robot file makes ${M_PI} available to every module included after it.
+M_SCALE is defined here too. plate1.xacro and plate2.xacro reference it, and
+before this refactor NOTHING in this package defined it - it only resolved
+because jupiterobot2_head_description was included earlier and happened to
+declare it. Reordering includes would have broken the mesh scales silently.
+Do not redefine either property elsewhere; a second definition shadows this one.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <xacro:property name="M_PI" value="3.14159265359"/>
+
+  <!-- Millimetre STLs are authored in mm; URDF wants metres. -->
+  <xacro:property name="M_SCALE" value="0.001"/>
+</robot>

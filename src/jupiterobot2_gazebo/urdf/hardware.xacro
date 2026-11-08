@@ -1,0 +1,162 @@
+<?xml version="1.0"?>
+<!-- Hardware selection for the SO-100 arm.
+
+TWO PLUGINS, ONE SWITCH
+Everything in this file is chosen by `use_fake_hardware`, because the same
+<ros2_control> block has to serve Gazebo, a desktop without the robot, and the
+real servo bus. Do not add a second <ros2_control> element anywhere: Gazebo
+binds a joint to whichever block it sees first and silently drops writes aimed
+at the other. That bug already happened with head_joint.
+
+    fake:=true   (default)  mock_components/GenericSystem
+                            positions echo back what you command. Safe with no
+                            hardware attached, so this is the default. Every
+                            existing launch keeps working unchanged.
+    fake:=false             the real Feetech ST3215 bus.
+
+THE REAL PLUGIN NAME IS A KNOWN LANDMINE
+The .so shipped at
+    ~/fyp1/install/rbc_so100_hardware/lib/rbc_so100_hardware/librbc_so100_hardware.so
+registers its class as
+
+    rbc_so100_controller/RBCSOARM100Interface      (per its own .xml)
+
+but the upstream xacro that ships with it references
+
+    rbc_so100_controller/SOARM100Interface
+
+Those are different strings. The C++ symbols in the .so confirm the class is
+RBCSOARM100Interface, so the .xml is right and the upstream xacro is wrong.
+Use arm_plugin_class:=... to override if a future build disagrees; both names
+are listed so the failure is one parameter away instead of an unexplainable
+"plugin not found".
+
+JOINT NAMES
+The driver does NOT hardcode joint names. Verified against the .so: no
+Base_Shoulder_joint or similar strings are embedded, it reads them from the
+<hardware> interface info it is handed. So our SO-100 names work as-is and
+controllers.yaml needs no change.
+
+PORT
+/dev/jupiter/arm, not /dev/ttyACM1. The udev rule in /dev/jupiter/ is stable
+across reboots; ttyACM numbers are not. Passing the raw device name is how the
+lidar once ended up opening the head servo's bus.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="use_fake_hardware" default="true"/>
+  <xacro:arg name="use_gazebo"        default="false"/>
+  <xacro:arg name="arm_port"        default="/dev/jupiter/arm"/>
+  <xacro:arg name="arm_baudrate"    default="1000000"/>
+  <xacro:arg name="arm_servo_speed" default="2400"/>
+  <xacro:arg name="arm_servo_accel" default="50"/>
+  <xacro:arg name="arm_plugin_class"
+             default="rbc_so100_controller/RBCSOARM100Interface"/>
+
+  <ros2_control name="Jupiter2Hardware" type="system">
+    <hardware>
+      <!-- Gazebo wins over everything: inside the simulator the physics engine
+           IS the hardware, so the servo-bus plugin must never be loaded. -->
+      <xacro:if value="$(arg use_gazebo)">
+        <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+      </xacro:if>
+
+      <xacro:unless value="$(arg use_gazebo)">
+        <xacro:if value="$(arg use_fake_hardware)">
+          <plugin>mock_components/GenericSystem</plugin>
+        </xacro:if>
+        <xacro:unless value="$(arg use_fake_hardware)">
+          <plugin>$(arg arm_plugin_class)</plugin>
+          <param name="use_serial">true</param>
+          <param name="serial_port">$(arg arm_port)</param>
+          <param name="serial_baudrate">$(arg arm_baudrate)</param>
+          <param name="servo_speed">$(arg arm_servo_speed)</param>
+          <param name="servo_acceleration">$(arg arm_servo_accel)</param>
+        </xacro:unless>
+      </xacro:unless>
+    </hardware>
+
+    <!-- ============ SO-100 arm ============ -->
+    <!-- Position command + position/velocity/effort state on every joint: the
+         rbc driver exposes all four, and joint_trajectory_controller wants
+         at least position + velocity. -->
+    <joint name="shoulder_pan">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="shoulder_lift">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="elbow_flex">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="wrist_flex">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="wrist_roll">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <joint name="gripper">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+      <state_interface name="effort"/>
+    </joint>
+
+    <!-- ============ head pan ============ -->
+    <!-- head_joint is ONLY declared for Gazebo and the fake backend.
+         It must not be in the real hardware system: the rbc driver numbers
+         servos by JOINT ORDER (joint 1 -> servo ID 1, ...), so declaring 7
+         joints on a 6-servo bus makes it ping servo 7, fail, and abort the
+         whole controller_manager during activate. Observed exactly that:
+
+             Servo 1..6 initialized at position ...
+             [ERROR] No response from servo 7 during initialization
+             Failed to set the initial state of the component to active
+
+         On real hardware head_joint is an AX-12A on the FTDI adapter, driven
+         by jupiterobot2_head_bringup/head_node.py, which publishes it on
+         /joint_states itself. So it belongs to a different bus, not this one. -->
+    <xacro:unless value="$(arg use_gazebo)">
+      <xacro:if value="$(arg use_fake_hardware)">
+        <joint name="head_joint">
+          <command_interface name="position"/>
+          <state_interface name="position"/>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+        </joint>
+      </xacro:if>
+    </xacro:unless>
+
+    <!-- Gazebo always needs head_joint: there is no head_node in the sim. -->
+    <xacro:if value="$(arg use_gazebo)">
+      <joint name="head_joint">
+        <command_interface name="position"/>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+        <state_interface name="effort"/>
+      </joint>
+    </xacro:if>
+
+  </ros2_control>
+
+</robot>

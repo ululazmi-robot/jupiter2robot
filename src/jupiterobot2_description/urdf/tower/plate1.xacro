@@ -1,0 +1,135 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+  Plate 1 - the camera/lidar deck, plus the cables and the 300 mm risers.
+
+  Children, in order:
+    astra_pro_camera  macro call, defined in urdf/sensors/astra_pro_camera.urdf.xacro
+    base_scan         lidar frame; scan_joint carries rpy 0 PI 0 because the
+                      rplidar mesh is authored facing backwards
+    cables_link
+    pole_300 x4       the risers that carry plate_2
+
+  -->
+
+  <!-- 60 mm posts rising from stack_link; these carry plate_1. -->
+  <xacro:pole_60 parent="stack_link" num="0" x="0.06" y="0.116" z="0.108"/>
+  <xacro:pole_60 parent="stack_link" num="1" x="-0.06" y="0.116" z="0.108"/>
+  <xacro:pole_60 parent="stack_link" num="2" x="-0.06" y="-0.116" z="0.108"/>
+  <xacro:pole_60 parent="stack_link" num="3" x="0.06" y="-0.116" z="0.108"/>
+
+
+  <joint name="plate_1_joint" type="fixed">
+    <parent link="stack_link"/>
+    <child link="plate_1_link"/>
+    <origin xyz="0 0 0.138" rpy="0 0 0"/>
+  </joint>
+  <link name="plate_1_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/plate_1.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.003" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.006" radius="0.165"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.003" />
+      <mass value="0.45" />
+      <inertia ixx="0.0030641625" ixy="0.0" ixz="0.0"
+               iyy="0.0030641625" iyz="0.0"
+               izz="0.006125625" />
+    </inertial>
+  </link>
+
+  <!-- NEW ASTRA CAMERA -->
+  <xacro:sensor_camera_astra_pro parent="plate_1_link"/>
+
+  <joint name="scan_joint" type="fixed">
+    <parent link="plate_1_link"/>
+    <child link="base_scan"/>
+    <origin xyz="0 0 -0.04615" rpy="0 ${M_PI} 0"/>
+  </joint>
+
+  <link name="base_scan">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/sensors/rplidar.dae" scale="1 1 1"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.01 0 -0.016" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.05" radius="0.05"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.01 0 -0.016" />
+      <mass value="0.188" />
+      <inertia ixx="0.0001567" ixy="0.0" ixz="0.0"
+               iyy="0.0001567" iyz="0.0"
+               izz="0.000235" />
+    </inertial>
+  </link>
+
+  <joint name="cables_joint" type="fixed">
+    <parent link="plate_1_link"/>
+    <child link="cables_link"/>
+    <origin xyz="-0.13 0 0" rpy="${M_PI/2} 0 ${M_PI/2}"/>
+  </joint>
+  <link name="cables_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/cables.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="FlatBlack"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/cables.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <xacro:pole_300 parent="plate_1_link" num="0" x="0.04" y="0.14" z="0.156"/>
+  <xacro:pole_300 parent="plate_1_link" num="1" x="-0.04" y="0.14" z="0.156"/>
+  <xacro:pole_300 parent="plate_1_link" num="2" x="-0.04" y="-0.14" z="0.156"/>
+  <xacro:pole_300 parent="plate_1_link" num="3" x="0.04" y="-0.14" z="0.156"/>
+
+  <joint name="pipe_300_joint" type="fixed">
+    <parent link="plate_1_link"/>
+    <child link="pipe_300_link"/>
+    <origin xyz="-0.13 0 0.156" rpy="0 0 0"/>
+  </joint>  
+  <link name="pipe_300_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/pipe_300.stl" scale="${M_SCALE} ${M_SCALE} ${M_SCALE}"/>
+      </geometry>
+      <material name="FlatBlack"/>
+    </visual>  
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <cylinder length="0.3" radius="0.0125"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0" />
+      <mass value="0.06" />
+      <inertia ixx="0.00045234375" ixy="0.0" ixz="0.0"
+               iyy="0.00045234375" iyz="0.0"
+               izz="4.6875e-06" />
+    </inertial>
+  </link>
+
+</robot>

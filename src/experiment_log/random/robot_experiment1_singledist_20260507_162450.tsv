@@ -1,0 +1,6 @@
+timestamp	event	cpu_%	ram_%	gpu_%	time_taken_sec	latency_sec	oneway_latency_sec	total_latency_sec
+16:24:59	DETECTED_HOME	12.3	26.8	0.0	0.0	0.799	0.0	0.0
+16:25:02	REACHED_HOME	12.4	26.9	0.0	0.065	0.799	0.899	0.864
+16:25:11	DETECTED_KITCHEN	12.7	26.9	0.0	0.0	1.923	0.0	0.0
+16:26:07	REACHED_KITCHEN	15.8	27.0	0.0	52.718	1.923	2.023	54.642
+16:26:34	DETECTED_PREVIOUS	13.3	27.1	0.0	0.0	0.603	0.0	0.0

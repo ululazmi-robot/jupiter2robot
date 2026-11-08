@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>jupiter_monitor_tui</name>
+  <version>0.1.0</version>
+  <description>
+    Read-only Textual dashboard for the Jupiter 2 monitor. Renders
+    /robot/health when the hub is running, and falls back to probing the driver
+    manifest itself when it is not.
+  </description>
+  <maintainer email="jupiter@example.com">Jupiter Project</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>jupiter_monitor_msgs</exec_depend>
+  <exec_depend>jupiter_monitor_hub</exec_depend>
+  <exec_depend>python3-textual</exec_depend>
+  <exec_depend>python3-rich</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

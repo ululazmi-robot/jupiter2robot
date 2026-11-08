@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!-- RPLidar A1 as a Gazebo ray sensor on base_scan.
+
+The working lidar plugin lived in jupiter2_gazebo.xacro. The multi-camera file
+had this sensor too but its plugin was commented out ("12/1/2026 been comment
+10.06"), so the copy that survives is the one that actually published /scan.
+
+range max is 12.0 m here. The dead copy said 10.0 m, but the A1's real spec is
+12 m and nothing consumed the difference, so the working value wins.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="laser_visual" default="false"/>
+
+  <gazebo reference="base_scan">
+    <material>Gazebo/FlatBlack</material>
+    <sensor type="ray" name="rplidar_a1_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>$(arg laser_visual)</visualize>
+      <update_rate>5.5</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.234</min>
+          <max>12.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_laser_controller" filename="libgazebo_ros_ray_sensor.so">
+        <ros>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <frame_name>base_scan</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>

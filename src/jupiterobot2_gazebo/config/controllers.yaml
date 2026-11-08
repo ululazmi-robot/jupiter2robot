@@ -1,0 +1,62 @@
+# Controller layout for the Jupiter 2 sim (Gazebo classic + gazebo_ros2_control).
+#
+# NAMING: the controller names are unchanged (arm_group_controller,
+# gripper_group_controller, head_group_controller) because
+# jupiterobot2_gazebo/launch/gazebo.launch.py spawns them by name in its
+# CONTROLLERS tuple, and anything else launched alongside expects them.
+# The JOINTS inside them are the SO-100 names from so100.urdf. The old
+# arm1_joint..arm4_joint names no longer exist anywhere in the URDF.
+controller_manager:
+  ros__parameters:
+    update_rate: 50
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    arm_group_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    gripper_group_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+    head_group_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+arm_group_controller:
+  ros__parameters:
+    joints:
+      - shoulder_pan
+      - shoulder_lift
+      - elbow_flex
+      - wrist_flex
+      - wrist_roll
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+    # Kept at 0 so a trajectory endpoint holds exactly where it was sent.
+    # There is deliberately NO "move to home on activate" behaviour here: the
+    # rest pose is all-zeros and every one of those values is also a URDF joint
+    # limit, so any automatic homing command would drive joints straight into
+    # their mechanical stops. That is what produced the servo overload blink.
+
+gripper_group_controller:
+  ros__parameters:
+    joints:
+      - gripper
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity
+
+head_group_controller:
+  ros__parameters:
+    joints:
+      - head_joint
+    command_interfaces:
+      - position
+    state_interfaces:
+      - position
+      - velocity

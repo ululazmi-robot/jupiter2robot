@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<!-- Mount the SO-100 arm on the Jupiter 2 tower.
+
+WHERE THIS SITS
+The arm hangs directly off plate_2_link (the arm deck, z = 0.475 m), exactly as
+it did in the deploy package ~/jupiter2_so100_deploy, where the transforms were
+tuned against the physical hardware:
+
+    plate_2_link  =>  arm_holder_link  (3D printed SO-100 cradle)
+                  =>  base             (SO-100 arm root, from so100.urdf)
+
+WHY IT NO LONGER USES arm_mount_link
+jupiter2_pro.urdf.xacro still defines arm_mount_link on plate_2_link at
+xyz 0.134 0 0.006. That link existed to carry the old AX-12 arm, which has been
+removed. Anchoring this macro to arm_mount_link pushed the SO-100 134 mm out-
+board of where it actually sits, which is visible in RViz as the arm floating
+clear of the deck and well past the tower.
+
+arm_mount_link is left in the tower description because the RoboCup world files
+and the rviz link lists still reference it, but nothing functional uses it now.
+If you want the arm somewhere else, change arm_holder_joint below. Do not
+reintroduce arm_mount_link into this chain.
+
+DO NOT "TIDY" THE TRANSFORMS
+The -1.5708 / +1.5708 pair turns the SO-100's +Y-forward base frame upright on a
+horizontal deck. Adjusting either by hand and eyeballing RViz silently rotates
+the whole arm.
+
+NOTE ON COMMENTS
+No double hyphens anywhere in this file. XML forbids them inside a comment and
+xacro reports it as "not well-formed (invalid token)" pointing at the comment,
+not at the real cause.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:macro name="jupiter2_so100_arm" params="parent">
+
+    <!-- ============ 3D printed SO-100 cradle ============ -->
+    <joint name="arm_holder_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="arm_holder_link"/>
+      <origin xyz="0.0940 -0.0170 0.0060" rpy="1.5708 0.0000 0.0000"/>
+    </joint>
+
+    <link name="arm_holder_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://jupiterobot2_description/meshes/stacks/RobotArmHolderJupiter_adjusted.stl"
+                scale="0.001 0.001 0.001"/>
+        </geometry>
+        <material name="3d_printed"/>
+      </visual>
+      <!-- Box approximates the cradle better than the raw mesh for collision:
+           the printed part is a thin shell and mesh-vs-mesh contact in Gazebo
+           is both slow and noisy. -->
+      <collision>
+        <origin xyz="0.024 0 -0.016" rpy="0 0 0"/>
+        <geometry>
+          <box size="0.088 0.065 0.084"/>
+        </geometry>
+      </collision>
+      <inertial>
+        <origin xyz="0.024 0 -0.016" rpy="0 0 0"/>
+        <mass value="0.15"/>
+        <inertia ixx="0.0001" ixy="0" ixz="0" iyy="0.0001" iyz="0" izz="0.0001"/>
+      </inertial>
+    </link>
+
+    <gazebo reference="arm_holder_link">
+      <material>Gazebo/Yellow</material>
+      <selfCollide>true</selfCollide>
+      <gravity>true</gravity>
+    </gazebo>
+
+    <!-- ============ SO-100 base ============ -->
+    <!-- Child link "base" is declared by so100.urdf, which the caller must
+         include at top level before invoking this macro. -->
+    <joint name="so100_mount_joint" type="fixed">
+      <parent link="arm_holder_link"/>
+      <child link="base"/>
+      <origin xyz="-0.0090 0.0040 -0.0170" rpy="-1.5708 1.5708 0.0000"/>
+    </joint>
+
+  </xacro:macro>
+
+</robot>

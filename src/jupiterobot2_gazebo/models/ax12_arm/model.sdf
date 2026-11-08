@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+  <model name="ax12_arm">
+    <!-- Placeholder. This model exists so Gazebo's model:// resolver can find
+         the legacy AX-12 STLs referenced by the robocup world files. Nothing
+         instantiates this model directly. -->
+  </model>
+</sdf>

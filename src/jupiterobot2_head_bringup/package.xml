@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>jupiterobot2_head_bringup</name>
+  <version>1.0.0</version>
+  <description>
+    ROS 2 bringup for the Jupiter 2 head camera pan joint: an AX-12A at ID 6 on
+    an FTDI FT232H. Drives Dynamixel protocol 1.0 directly because
+    dynamixel_hardware_interface is protocol 2.0 only and has no AX-12 model.
+  </description>
+  <maintainer email="jupiter@example.com">Jupiter Project</maintainer>
+  <license>Apache-2.0</license>
+
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>diagnostic_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>std_srvs</exec_depend>
+  <exec_depend>trajectory_msgs</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+
+  <export>
+    <build_type>ament_python</build_type>
+  </export>
+</package>

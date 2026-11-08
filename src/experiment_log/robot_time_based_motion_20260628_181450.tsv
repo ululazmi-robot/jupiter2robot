@@ -1,0 +1,4 @@
+timestamp	event	cpu_%	ram_%	gpu_%	time_taken_sec	latency_sec	oneway_latency_sec	total_latency_sec
+18:15:14	START_FORWARD_1.0S	8.5	26.3	0.0	0.0	0.803	0.0	0.0
+18:15:15	SUCCESS_FORWARD_1.0S	8.8	26.4	0.0	1.003	0.803	0.903	1.806
+18:15:41	SHUTDOWN_TRIGGERED	9.0	26.5	0.0	0.0	0.613	0.0	0.0

@@ -1,0 +1,10 @@
+timestamp	trial_no	location	cpu_%	ram_%	time_taken_sec	stt_latency_sec
+16:08:37	1	living room	21.3	41.8	7.5	0.758
+16:08:55	2	living room	24.0	40.5	7.073	0.0
+16:09:21	3	living room	22.4	40.6	12.084	0.0
+16:09:40	4	living room	21.7	40.5	7.501	0.0
+16:10:12	5	living room	22.4	40.5	20.0	0.0
+16:10:53	6	living room	22.5	40.5	28.002	0.0
+16:11:10	7	living room	21.5	40.5	4.001	0.0
+16:11:41	8	living room	22.7	40.5	20.004	0.0
+16:12:33	9	living room	22.3	41.0	34.502	0.0

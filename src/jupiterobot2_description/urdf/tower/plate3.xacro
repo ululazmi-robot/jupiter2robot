@@ -1,0 +1,96 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+  <!--
+  Plate 3 - top deck: mic, e-stop, and the two 80 mm posts that carry the
+  monitor frame.
+  -->
+
+
+  <joint name="plate_3_joint" type="fixed">
+    <parent link="plate_2_link"/>
+    <child link="plate_3_link"/>
+    <origin xyz="0 0 0.206" rpy="0 0 0"/>
+  </joint>
+  <link name="plate_3_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/plate_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="Black"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/plate_3.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="-0.08 0 0.003"/>  <!--0.16*0.27*0.006-->
+      <mass value="0.152" />
+      <inertia ixx="0.000923856" ixy="0.0" ixz="0.0"
+               iyy="0.0003247227" iyz="0.0"
+               izz="0.001247667" />
+    </inertial>
+  </link>
+
+  <joint name="mic_joint" type="fixed">
+    <parent link="plate_3_link"/>
+    <child link="mic_link"/>
+    <origin xyz="0 -0.13466 0.006" rpy="0 0 0"/>
+  </joint>
+  <link name="mic_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/microphone.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="DarkGrey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/microphone.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="-0.02 0 0.03"/>  <!--0.04*0.03*0.06-->
+      <mass value="0.21" />
+      <inertia ixx="7.875e-05" ixy="0.0" ixz="0.0"
+               iyy="9.1e-05" iyz="0.0"
+               izz="4.375e-05" />
+    </inertial>
+  </link>
+
+  <joint name="estop_joint" type="fixed">
+    <parent link="plate_3_link"/>
+    <child link="estop_link"/>
+    <origin xyz="0 0.13466 -0.0381" rpy="0 0 0"/>
+  </joint>
+  <link name="estop_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/e_stop.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="DarkGrey"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://jupiterobot2_description/meshes/stacks/e_stop.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0 0 0.038" />  <!--R0.018*0.0685-->
+      <mass value="0.0763" />
+      <inertia ixx="3.60151896e-05" ixy="0.0" ixz="0.0"
+               iyy="3.60151896e-05" iyz="0.0"
+               izz="1.23606e-05" />
+    </inertial>
+  </link>
+
+  <xacro:pole_80 parent="plate_3_link" num="0" x="-0.115" y="0.05" z="0.046"/>
+  <xacro:pole_80 parent="plate_3_link" num="1" x="-0.115" y="-0.05" z="0.046"/>
+
+</robot>

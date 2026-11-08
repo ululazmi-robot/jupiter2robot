@@ -1,0 +1,355 @@
+# Jupiter 2 driver manifest -- the single source of truth for the monitor.
+#
+# Every driver and software tool the robot has, what it needs, and how it is
+# reached. The hub reads this to build /robot/health; the TUI renders it.
+#
+# NATIVE TOPIC NAMES ONLY. Unlike the Jupitron access layer this manifest was
+# ported from, there is no remapping layer: the names below are the names the
+# repo's own launch files already publish. If you add a namespace, change them
+# here and nowhere else.
+#
+# Fields
+#   key            stable id, "<category>.<name>"
+#   category       body | arm | head | vision | audio | tools
+#   label          what a human should see
+#   driver         the package/executable that owns the device
+#   device         /dev node, USB vid:pid, ALSA name, or "-" for pure software
+#   backend        native   = an existing ROS 2 driver in this repo
+#                  external = a tool the monitor only watches, never owns
+#   probe          how to decide whether it is alive:
+#                    port:<path>        tty exists / is held
+#                    usb:<vid>:<pid>    device enumerates
+#                    topic:<name>       a topic has a publisher
+#                    serial:<proto>      protocol-level ping (feetech|ax12)
+#                    alsa:<cap|play>    ALSA device exists
+#                    input:<name>       /dev/input device by name
+#                    proc:<pattern>     a process matches
+#                    none               always available (pure software)
+#   primary_topic  the topic the TUI shows a rate for, "" when none
+#   topics         every topic this driver exposes, as [name, type, role]
+#   real_hardware  true when it can move something or read a physical sensor
+#   controllable   true when the supervisor may start/stop it (currently unused;
+#                  kept so a supervisor can be added without a schema change)
+#   requires_confirm  true when a stop leaves hardware energised or a start moves
+#   launch         how to start it: {package, file, args[]} -- omit if external
+#   notes          one-line caveat shown in the TUI detail pane
+
+version: 1
+
+drivers:
+
+  # =========================================================== body =========
+  - key: body.base
+    category: body
+    label: Base drive (OpenCR)
+    driver: turtlebot3_node / turtlebot3_ros
+    device: /dev/ttyACM0
+    backend: native
+    probe: port:/dev/ttyACM0
+    primary_topic: /odom
+    topics:
+      - [/cmd_vel, geometry_msgs/msg/Twist, command]
+      - [/odom, nav_msgs/msg/Odometry, state]
+      - [/imu, sensor_msgs/msg/Imu, state]
+      - [/battery_state, sensor_msgs/msg/BatteryState, state]
+      - [/joint_states, sensor_msgs/msg/JointState, state]
+      - [/sensor_state, turtlebot3_msgs/msg/SensorState, state]
+    real_hardware: true
+    controllable: true
+    requires_confirm: false
+    launch:
+      package: jupiterobot2_bringup
+      file: jupiterobot2_core.launch.py
+      args: []
+    notes: >-
+      Started by jupiterobot2_core.launch.py with -i /dev/ttyACM0. Firmware owns
+      the wheel PID. Separation is configured 0.160 m but the chassis is
+      0.287 m, so yaw odometry reads ~1.79x too large.
+
+  - key: body.lidar
+    category: body
+    label: RPLidar (2D scan)
+    driver: rplidar_ros / rplidar_node
+    device: /dev/jupiter/lidar -> CP2102 10c4:ea60
+    backend: native
+    probe: port:/dev/ttyUSB0
+    primary_topic: /scan
+    topics:
+      - [/scan, sensor_msgs/msg/LaserScan, state]
+    real_hardware: true
+    controllable: true
+    requires_confirm: false
+    launch:
+      package: jupiterobot2_bringup
+      file: jupiterobot2_lidar.launch.py
+      args: []
+    notes: >-
+      Port is no longer hardcoded. jupiterobot2_lidar.launch.py resolves it in
+      order: /dev/jupiter/lidar symlink, then whichever tty the kernel reports as
+      CP2102 10c4:ea60, then a logged last-resort guess. 115200 baud, frame
+      base_scan. scan_mode must stay 'Sensitivity' -- faster modes overflow the
+      driver buffer after ~30 s and /scan silently stops. Verified 7.8 Hz with
+      live ranges. The old hardcoded /dev/ttyUSB1 was the HEAD SERVO's bus.
+
+  # ========================================================== arm ===========
+  - key: arm.so100
+    category: arm
+    label: Arm (SO-100, 6x Feetech ST3215)
+    driver: jupitron_gateway feetech_bridge / so100_description
+    device: /dev/ttyACM1
+    backend: native
+    probe: serial:feetech
+    primary_topic: /joint_states
+    topics:
+      - [/joint_states, sensor_msgs/msg/JointState, state]
+    real_hardware: true
+    controllable: true
+    requires_confirm: true
+    launch:
+      package: so100_description
+      file: ""
+      args: []
+    notes: >-
+      Physically a Feetech ST3215 bus on the CH340 (/dev/ttyACM1, 1 Mbaud,
+      IDs 1-6), matching the SO-100 described in so100_description. NOTE: this
+      repo currently ships NO ROS 2 driver for it -- there is no working launch
+      file, so the bus ping is the only liveness evidence and /joint_states
+      will stay silent until a driver exists. IGNORE
+      jupiterobot2_bringup/config/jupiterobot2_arm_head.yaml and
+      launch/arm_head_bringup.launch: those describe 4x AX-12 + gripper, are
+      written in ROS 1 syntax, and expect /dev/arm which no udev rule creates.
+
+  # ========================================================= head ===========
+  - key: head.camera_pan
+    category: head
+    label: Head camera pan (AX-12A, ID 6)
+    driver: jupiterobot2_head_bringup / head_node
+    device: /dev/jupiter/head -> FTDI 0403:6014
+    backend: native
+    probe: serial:ax12
+    # Deliberately empty: the arm owns /joint_states for rate measurement. Two
+    # drivers subscribing to the same topic would double-count it. The head still
+    # reports its state from the bus ping and its own /joint_states publisher.
+    primary_topic: ""
+    topics:
+      - [/joint_states, sensor_msgs/msg/JointState, state]
+      - [/head_controller/joint_trajectory, trajectory_msgs/msg/JointTrajectory, command]
+      - [/head/joint_goal, sensor_msgs/msg/JointState, command]
+      - [/head/enable, std_srvs/srv/SetBool, service]
+    real_hardware: true
+    controllable: true
+    requires_confirm: false
+    launch:
+      package: jupiterobot2_head_bringup
+      file: head.launch.py
+      args: []
+    notes: >-
+      Works under ROS 2: ros2 launch jupiterobot2_head_bringup head.launch.py.
+      Verified driving the servo -- commanded 0.0/-0.5/5.0 rad and measured
+      0.000/-0.501/1.483 (5.0 correctly clamped to the 1.5 limit). Torque is OFF
+      until /head/enable is called. Shares /joint_states with the arm. The AX-12
+      spans 300 deg over 1024 ticks, so RAD_PER_TICK is 300/1024, NOT 2*pi/1024
+      (that makes every angle 20 percent small). Port resolves to
+      /dev/jupiter/head when the udev rule is installed, else the FTDI found by
+      VID 0403, else /dev/ttyUSB1. The CP2102 lidar and this FTDI swap between
+      ttyUSB0/ttyUSB1 across reboots -- never hardcode the number.
+
+  # ======================================================= vision ===========
+  - key: vision.camera
+    category: vision
+    label: Depth camera (Orbbec Astra)
+    driver: astra_camera / astra_camera_node
+    device: usb 2bc5:065b
+    backend: native
+    probe: usb:2bc5:065b
+    primary_topic: /camera/depth/image_raw
+    topics:
+      - [/camera/depth/image_raw, sensor_msgs/msg/Image, state]
+      - [/camera/depth/camera_info, sensor_msgs/msg/CameraInfo, state]
+      - [/camera/ir/image_raw, sensor_msgs/msg/Image, state]
+      - [/camera/color/image_raw, sensor_msgs/msg/Image, state]
+      - [/camera/depth_registered/points, sensor_msgs/msg/PointCloud2, state]
+    real_hardware: true
+    controllable: true
+    requires_confirm: false
+    launch:
+      package: astra_camera
+      file: astra.launch.xml
+      args: []
+    notes: >-
+      Colour AND depth both work: verified rgb8 640x480 at 25 Hz (mean 92,
+      98.4% non-zero) and 16UC1 depth at 28 Hz on serial AD75733010B. The device
+      reports itself as "Astra", NOT "Astra Pro". With enable_color and
+      enable_ir both true the driver logs "Infrared and Color streams are
+      enabled. Infrared stream will be disabled" -- so you get colour + depth and
+      NO IR. Set enable_color:=false if you want IR instead. No /dev/video* node
+      is normal (vendor-class USB 255). Pass product_id:=0x065b explicitly; it
+      defaults to empty.
+
+  - key: vision.pipeline
+    category: vision
+    label: Vision pipeline (YOLO / MediaPipe)
+    driver: jupiterobot2_vision
+    device: "-"
+    backend: external
+    probe: proc:yolo_node|mediapipe_node
+    primary_topic: ""
+    topics:
+      - [/yolo_result, sensor_msgs/msg/Image, debug]
+      - [/mediapipe_result, sensor_msgs/msg/Image, debug]
+    real_hardware: false
+    controllable: false
+    requires_confirm: false
+    notes: >-
+      yolo_node subscribes /camera/color/image_raw, which DOES work on this unit
+      -- colour is live at 25 Hz, so YOLO is fine as written. mediapipe_node
+      subscribes /image_raw, a name nothing in this repo publishes; point it at
+      /camera/color/image_raw too.
+
+  # ======================================================== audio ===========
+  - key: audio.input
+    category: audio
+    label: Microphone input
+    driver: ALSA (laptop ALC897)
+    device: hw:0,0
+    backend: external
+    probe: alsa:cap
+    primary_topic: ""
+    topics: []
+    real_hardware: true
+    controllable: false
+    requires_confirm: false
+    notes: >-
+      There is no robot microphone. The only capture device is the laptop's
+      3.5 mm headset jack, so STT nodes hear silence unless a headset is in.
+
+  - key: audio.output
+    category: audio
+    label: Speaker output
+    driver: ALSA default sink
+    device: default
+    backend: external
+    probe: alsa:play
+    primary_topic: ""
+    topics:
+      - [/speech_output, std_msgs/msg/String, command]
+    real_hardware: true
+    controllable: false
+    requires_confirm: false
+    notes: >-
+      tts_node listens on /speech_output. gTTS is a cloud call; without network
+      the TTS nodes fail silently. espeak-ng or piper are the offline
+      alternatives.
+
+  - key: audio.voice
+    category: audio
+    label: Voice STT/TTS nodes
+    driver: jupiterobot2_voice
+    device: "-"
+    backend: external
+    probe: proc:stt_node|tts_node|voice_node|backgroud_stt
+    primary_topic: ""
+    topics:
+      - [/voice_commands, std_msgs/msg/String, state]
+    real_hardware: false
+    controllable: false
+    requires_confirm: false
+    notes: >-
+      voice_node.py runs a 1 Hz timer whose callback blocks up to 10 s, so it
+      samples in bursts. Needs network for Google STT and gTTS.
+
+  # ======================================================== tools ===========
+  - key: tools.teleop
+    category: tools
+    label: Keyboard teleop
+    driver: jupiterobot2_teleop / teleop_keyboard
+    device: "-"
+    backend: native
+    probe: proc:teleop_keyboard
+    primary_topic: /cmd_vel
+    topics:
+      - [/cmd_vel, geometry_msgs/msg/Twist, command]
+    real_hardware: false
+    controllable: true
+    requires_confirm: false
+    launch:
+      package: jupiterobot2_teleop
+      file: keyboard_teleop.launch.py
+      args: []
+    notes: >-
+      Publishes on /cmd_vel. Installed with RENAME teleop_keyboard, so
+      `ros2 run jupiterobot2_teleop teleop_keyboard`.
+
+  - key: tools.gamepad
+    category: tools
+    label: Gamepad (Logitech F710)
+    driver: joy / joy_node
+    device: /dev/input/js1
+    backend: native
+    probe: input:Logitech Gamepad F710
+    primary_topic: /joy
+    topics:
+      - [/joy, sensor_msgs/msg/Joy, state]
+    real_hardware: true
+    controllable: true
+    requires_confirm: false
+    launch:
+      package: jupiterobot2_teleop
+      file: joystick_teleop.launch.py
+      args: []
+    notes: >-
+      F710 is js1, NOT js0 -- js0 is the ILITEK touchscreen. The X/D switch on
+      the pad changes the axis layout.
+
+  - key: tools.nav2
+    category: tools
+    label: Nav2 navigation
+    driver: nav2_bringup
+    device: "-"
+    backend: external
+    probe: proc:nav2|controller_server|bt_navigator
+    primary_topic: /plan
+    topics:
+      - [/plan, nav_msgs/msg/Path, state]
+      - [/amcl_pose, geometry_msgs/msg/PoseWithCovarianceStamped, state]
+    real_hardware: false
+    controllable: false
+    requires_confirm: false
+    notes: >-
+      jupiterobot2_navigation/launch/navigation.launch.py exists; check its
+      use_sim_time before running on hardware, and confirm the map yaml it
+      points at actually exists.
+
+  - key: tools.slam
+    category: tools
+    label: SLAM (slam_toolbox)
+    driver: slam_toolbox
+    device: "-"
+    backend: external
+    probe: proc:slam_toolbox
+    primary_topic: /map
+    topics:
+      - [/map, nav_msgs/msg/OccupancyGrid, state]
+    real_hardware: false
+    controllable: false
+    requires_confirm: false
+    notes: >-
+      jupiterobot2_gazebo/launch has slam*.launch.py variants including a
+      no-odom one. Use the no_odom mapper params when wheel odometry is drifting.
+
+  - key: tools.sim
+    category: tools
+    label: Gazebo simulation
+    driver: gazebo_ros / gzserver
+    device: "-"
+    backend: external
+    probe: proc:gzserver
+    primary_topic: /clock
+    topics:
+      - [/clock, rosgraph_msgs/msg/Clock, state]
+    real_hardware: false
+    controllable: false
+    requires_confirm: false
+    notes: >-
+      jupiterobot2_gazebo/launch/gazebo.launch.py. Duplicate Gazebo plugins in
+      a stale build can make gzserver segfault -- clean the build dir first.

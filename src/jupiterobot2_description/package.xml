@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>jupiterobot2_description</name>
+  <version>0.0.0</version>
+  <description>Jupiter 2 robot description package</description>
+
+  <maintainer email="support@jupiterobot.com">Jupiter Robot</maintainer>
+  <license>Apache-2.0</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <!-- ROS2 client libraries -->
+  <exec_depend>rclcpp</exec_depend>
+  <exec_depend>rclpy</exec_depend>
+
+  <!-- Messages -->
+  <exec_depend>std_msgs</exec_depend>
+
+  <!-- Robot description -->
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>joint_state_publisher</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+
+  <!-- The arm in jupiter2_pro.urdf.xacro is the SO-100. Without this, expanding
+       the URDF fails at "$(find so100_description)" on a clean machine. -->
+  <exec_depend>so100_description</exec_depend>
+
+  <!-- NO exec_depend on jupiterobot2_gazebo, deliberately.
+       jupiterobot2_gazebo depends on US for geometry, so naming it here makes
+       colcon report "Unable to order packages topologically" and nothing
+       builds. launch/gazebo.launch.py resolves it at runtime with
+       get_package_share_directory() and simply fails if the sim package is
+       absent, which is the correct behaviour: you cannot run that launch
+       without the sim package anyway. -->
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

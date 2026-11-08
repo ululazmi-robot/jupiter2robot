@@ -1,0 +1,324 @@
+basic command txt
+
+-------------------------------------------------------------------------------------
+
+TERMINATOR TERMINAL COMMAND 
+
+Start Terminator
+terminator
+
+Split Horizontally
+Ctrl + Shift + O
+
+Split Vertically
+Ctrl + Shift + E
+
+Navigate Between Panes
+Alt + Arrow Keys
+
+Close a Terminal Pane
+Ctrl + Shift + W
+
+------------------------------------------------------------------------------------
+
+update ros2 file
+
+cd ~/fyp1
+colcon build --symlink-install 
+source install/setup.bash
+
+
+------------------------------------------------------------------------------------
+
+force-close any hidden Gazebo processes:
+
+killall -9 gazebo gzserver gzclient
+
+
+------------------------------------------------------------------------------------
+PART 8 — Future Updates (After First Push)
+
+Whenever you change code:
+
+cd ~/fyp1
+git add .
+git commit -m "Describe what you changed"
+git push
+
+------------------------------------------------------------------------------------
+
+locate humble
+nautilus /opt/ros/humble/share/nav2_bringup/params/
+
+
+------------------------------------------------------------------------------------
+ros2 run demo_nodes_cpp talker
+------------------------------------------------------------------------------------
+
+rviz
+ros2 launch jupiterobot2_description display.launch.py
+
+
+gazebo
+ros2 launch jupiterobot2_gazebo gazebo.launch.py
+
+gazebo-custom_world
+ros2 launch jupiterobot2_gazebo gazebo_custom_world.launch.py 
+
+teleop
+ros2 run jupiterobot2_gazebo custom_teleop.py
+
+slam_toolbox
+ros2 launch slam_toolbox online_async_launch.py use_sim_time:=True
+
+SLAM+rviz
+ros2 launch jupiterobot2_gazebo slam_rviz.launch.py
+
+slam+rviz+hector
+ros2 launch jupiterobot2_gazebo slam_no_odom_rviz.launch.py
+
+save maps
+ros2 run nav2_map_server map_saver_cli -f ~/fyp1/src/jupiterobot2_gazebo/maps/no_odom_maps
+
+acml
+ros2 launch jupiterobot2_gazebo nav_standalone.launch.py
+
+bringup_launch
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=True map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/robocup_map.yaml
+
+
+------------------------------------------------------------------------------------
+rviz
+ros2 run rviz2 rviz2
+
+------------------------------------------------------------------------------------
+nak check gpu 
+nvtop
+
+------------------------------------------------------------------------------------
+test latency dds
+
+export ROS_DOMAIN_ID=42
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ros2 run latency_test latency_listener
+
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+
+------------------------------------------------------------------------------------
+exp1
+~/fyp1/src/exp1/src$ python3 exp1.py
+
+
+------------------------------------------------------------------------------------
+for acml
+
+ros2 launch jupiterobot2_gazebo gazebo_custom_world.launch.py  - buka gazebo
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=True map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/robocup_map.yaml - buka maps
+ros2 run rviz2 rviz2 - set rviz fixed frame to map
+
+
+------------------------------------------------------------------------------------
+for bringup robot
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+
+--------------------------------------------------
+voice recognition
+ros2 run jupiterobot2_voice stt_node.py
+ros2 run jupiterobot2_voice tts_node.py
+ros2 run jupiterobot2_voice voice_node.py
+----------------------------------
+Fix USB permissions
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+
+------------------------------------------------------------------------------------
+joystick_teleop
+ros2 launch jupiterobot2_teleop joystick_teleop.launch.py
+
+------------------------------------------------------------------------------------
+keyboard_teleop
+ros2 launch jupiterobot2_teleop keyboard_teleop.launch.py
+
+
+------------------------------------------------------------------------------------
+conduct mapping hardware
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py - launch robot
+ros2 launch jupiterobot2_gazebo slam_rviz.launch.py - launch mapping 
+ros2 launch jupiterobot2_teleop keyboard_teleop.launch.py - keyboard teleop control
+ros2 run nav2_map_server map_saver_cli -f ~/fyp1/src/jupiterobot2_gazebo/maps/no_odom_maps - save maps
+
+
+------------------------------------------------------------------------------------
+point to point movement(nav2 - gazebo)
+
+ros2 launch jupiterobot2_gazebo gazebo_custom_world.launch.py
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=True map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/robocup_map.yaml
+ros2 run rviz2 rviz2 - set rviz fixed frame to map and set position awai
+
+ros2 run jupiterobot2_navigation single_point.py - single point
+ros2 run jupiterobot2_navigation multiple_points.py - for multiple movement
+ros2 run jupiterobot2_navigation trial.py - for multiple movement trial
+
+------------------------------------------------------------------------------------
+voice recognition
+
+ros2 run jupiterobot2_voice stt_node.py
+ros2 run jupiterobot2_voice tts_node.py
+ros2 run jupiterobot2_voice voice_node.py
+
+------------------------------------------------------------------------------------
+experiment 1
+
+ros2 launch jupiterobot2_gazebo gazebo_custom_world.launch.py
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=True map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/robocup_map.yaml
+ros2 run rviz2 rviz2 - set rviz fixed frame to map and set position awai
+
+ros2 run vip_single vip_manager.py
+
+
+------------------------------------------------------------------------------------
+vision
+
+ros2 run v4l2_camera v4l2_camera_node - on camera laptop
+
+ros2 run jupiterobot2_vision yolo_node.py - run yolo_node
+ros2 run jupiterobot2_vision mediapipe_node.py - run mediapipe_node
+
+
+ros2 run rqt_image_view rqt_image_view
+
+------------------------------------------------------------------------------------
+vision - jupiter2-camera
+
+cd /home/ubuntu/fyp1
+source install/setup.bash
+sudo chmod 666 /dev/bus/usb/001/006
+# Use the standard layout file to prevent the UVC search loop crash
+ros2 launch astra_camera astra.launch.xml
+ros2 run jupiterobot2_vision yolo_node.py
+
+
+
+
+------------------------------------------------------------------------------------
+hardware
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=True map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/robotic_lab.yaml
+ros2 run rviz2 rviz2
+
+
+
+------------------------------------------------------------------------------------
+sr from laptopb to jetson
+ros2 run jupiterobot2_voice backgroud_stt.py 
+ros2 topic echo /voice_commands - run at jetson
+
+
+------------------------------------------------------------------------------------
+experiment vip_single_simulation    
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+
+ros2 launch jupiterobot2_gazebo gazebo_custom_world.launch.py
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=True map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/trialt2_1_simulation.yaml
+ros2 run rviz2 rviz2
+ros2 run vip_single vip_manager_simulation.py
+
+
+------------------------------------------------------------------------------------
+experiment vip_single
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=False map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/vibe_roomG.yaml
+ros2 run rviz2 rviz2
+ros2 run vip_single vip_manager_hardware.py
+
+
+
+
+----------------------------------------------------------------------------------
+distrubited vip_manager_simulation
+
+
+ros2 launch jupiterobot2_gazebo gazebo_custom_world.launch.py
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=True map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/trialt2_1_simulation.yaml
+ros2 run rviz2 rviz2 - set rviz fixed frame to map and set position awai
+
+export ROS_DOMAIN_ID=42
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ros2 run vip_dist vip_manager_simulation.py
+
+----------------------------------------------------------------------------------
+distrubited vip_manager_hardware
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=False map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/exp1_t2.yaml
+ros2 run rviz2 rviz2 - set rviz fixed frame to map and set position awai
+
+export ROS_DOMAIN_ID=42
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ros2 run vip_dist vip_manager_hardware.py
+
+
+------------------------------------------------------------------------------------
+experiment vip_demo
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=False map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/robotic_lab.yaml
+ros2 run rviz2 rviz2
+ros2 run vip_single vip_manager_hardware_demo.py
+
+----------------------------------------------------------------------------------
+distrubited vip_manager_hardware
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+ros2 launch nav2_bringup bringup_launch.py use_sim_time:=False map:=/home/ubuntu/fyp1/src/jupiterobot2_gazebo/maps/robotic_lab.yaml
+ros2 run rviz2 rviz2 - set rviz fixed frame to map and set position awai
+
+export ROS_DOMAIN_ID=42
+export RMW_IMPLEMENTATION=rmw_fastrtps_cpp
+ros2 run vip_dist vip_manager_demo.py
+
+
+----------------------------------------------------------------------------------
+basic code movement
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+ros2 run vip_single vip_manager_hardware_basic_move.py
+
+----------------------------------------------------------------------------------
+basic code movement
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+ros2 run vip_single vip_manager_hardware_basic_move.py
+
+----------------------------------------------------------------------------------
+demo_fcoee_1SS
+
+sudo chmod 666 /dev/ttyUSB0
+sudo chmod 666 /dev/ttyACM0
+ros2 launch jupiterobot2_bringup jupiterobot2_bringup.launch.py
+ros2 run vip_single  ros2 run vip_single demo_fcoee_1.py 

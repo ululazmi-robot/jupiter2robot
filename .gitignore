@@ -1,0 +1,30 @@
+# --- ROS 2 build artifacts ---
+build/
+install/
+log/
+*.pyc
+__pycache__/
+.vscode/
+
+# --- Large binaries: keep out of a plain git repo ---
+# 108 MB Vosk speech model. Re-download:
+#   https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
+# Expected at src/exp1/models/vosk-model-small-en-us-0.15/
+src/exp1/models/
+*.zip
+
+# Model weights / networks
+*.pt
+*.pth
+*.onnx
+
+# ROS bags and maps generated at runtime
+*.bag
+*.db3
+*.mcap
+no_odom_maps.pgm
+no_odom_maps.yaml
+
+# --- Firmware / updates ---
+opencr_update/
+opencr_update.tar.bz2

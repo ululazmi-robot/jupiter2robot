@@ -1,0 +1,247 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /RobotModel1
+        - /TF1
+        - /MountPoints1
+      Splitter Ratio: 0.42
+    Tree Height: 320
+  - Class: rviz_common/Selection
+    Name: Selection
+  - Class: rviz_common/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+Visualization Manager:
+  Class: ""
+  Displays:
+    # ---------------------------------------------------------------- grid
+    - Alpha: 0.35
+      Cell Size: 0.1
+      Class: rviz_default_plugins/Grid
+      Color: 130; 130; 130
+      Enabled: true
+      Line Style:
+        Line Width: 0.01
+        Value: Lines
+      Name: Grid 10cm
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 30
+      Reference Frame: <Fixed Frame>
+      Value: true
+
+    - Alpha: 0.6
+      Cell Size: 0.5
+      Class: rviz_default_plugins/Grid
+      Color: 200; 200; 200
+      Enabled: true
+      Line Style:
+        Line Width: 0.02
+        Value: Lines
+      Name: Grid 50cm
+      Normal Cell Count: 0
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Plane: XY
+      Plane Cell Count: 16
+      Reference Frame: <Fixed Frame>
+      Value: true
+
+    # ------------------------------------------------------------- robot
+    # NO per-link entries on purpose. "All Links Enabled: true" makes RViz
+    # build the link list from whatever arrives on /robot_description.
+    #
+    # The old pro.rviz hard-coded ~60 link names (arm1_link, camera_link,
+    # camera_rgb_frame, ...). Every one of those is now a dead link: the AX-12
+    # arm was replaced by the SO-100, and the camera frames were renamed
+    # camera_01_* / camera_02_*. A config that lists links by name rots the
+    # moment the URDF changes. This one cannot.
+    - Alpha: 1
+      Class: rviz_default_plugins/RobotModel
+      Collision Enabled: false
+      Description File: ""
+      Description Source: Topic
+      Description Topic:
+        Depth: 5
+        Durability Policy: Transient Local
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /robot_description
+      Enabled: true
+      Links:
+        All Links Enabled: true
+        Collision Links Enabled: true
+        Expand Joint Details: false
+        Expand Link Details: false
+        Expand Tree: false
+        Link Tree Style: Links in Alphabetic Order
+      Mass Properties:
+        Inertia: false
+        Mass: false
+      Name: RobotModel
+      TF Prefix: ""
+      Update Interval: 0
+      Value: true
+      Visual Enabled: true
+      # Collision Enabled stays false: the collision meshes are coarse boxes
+      # and drawing them over the visuals makes limb alignment impossible to
+      # judge. Tick it only when checking for self-intersection.
+
+    # ---------------------------------------------------------------- tf
+    # Set Frame Timeout to 0 and show names: this is the display you use when
+    # you want to know WHICH frame a part is really attached to.
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        # Only the frames that matter for mounting decisions. Enabling all of
+        # them draws a 3-axis triad on every pole and plate and hides the arm.
+        arm_mount_link:
+          Value: true
+        arm_holder_link:
+          Value: true
+        base:
+          Value: true
+        base_footprint:
+          Value: true
+        base_scan:
+          Value: true
+        camera_01_depth_optical_frame:
+          Value: true
+        camera_02_depth_optical_frame:
+          Value: true
+        gripper_body:
+          Value: true
+        head_mount_link:
+          Value: true
+        plate_1_link:
+          Value: true
+        plate_2_link:
+          Value: true
+        plate_3_link:
+          Value: true
+        tcp:
+          Value: true
+      Marker Scale: 0.18
+      Name: TF
+      Show Arrows: false
+      Show Axes: true
+      Show Names: true
+      Tree:
+        {}
+      Update Interval: 0
+      Value: true
+
+    # ------------------------------------------------------- mount points
+    # A big RGB triad at each adjustable joint origin. Point the camera at
+    # arm_holder_link and you can read off which axis moves the arm where
+    # before touching so100_mount_joint in the xacro.
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Length: 0.15
+      Name: Axes arm_mount_link
+      Radius: 0.012
+      Reference Frame: arm_mount_link
+      Value: true
+
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Length: 0.2
+      Name: Axes arm base (SO-100 root)
+      Radius: 0.015
+      Reference Frame: base
+      Value: true
+
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Length: 0.12
+      Name: Axes head_mount_link
+      Radius: 0.01
+      Reference Frame: head_mount_link
+      Value: true
+
+    - Class: rviz_default_plugins/Axes
+      Enabled: true
+      Length: 0.1
+      Name: Axes tcp
+      Radius: 0.008
+      Reference Frame: tcp
+      Value: true
+
+  Enabled: true
+  Global Options:
+    Background Color: 40; 44; 52
+    Fixed Frame: base_footprint
+    # base_footprint is the ground-projected root. Switching to base_link puts
+    # the origin 15 mm above the floor, which makes the robot look like it is
+    # floating when you check wheel contact.
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz_default_plugins/Interact
+      Hide Inactive Objects: true
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+    - Class: rviz_default_plugins/Measure
+      Line color: 128; 128; 0
+    - Class: rviz_default_plugins/SetInitialPose
+      Covariance x: 0.25
+      Covariance y: 0.25
+      Covariance yaw: 0.06853891909122467
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /initialpose
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 1.35
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Focal Point:
+        X: 0
+        Y: 0
+        Z: 0.45
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Invert Z Axis: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Pitch: 0.32
+      Target Frame: <Fixed Frame>
+      Value: Orbit (rviz)
+      Yaw: 0.85
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1000
+  Hide Left Dock: false
+  Hide Right Dock: false
+  QMainWindow State: 000000ff00000000fd0000000100000000000001560000037efc0200000002fb000000100044006900730070006c006100790073010000003d00000243000000c900fffffffb0000000a00560069006500770073010000028600000133000000a400ffffff000004dc0000037e00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c0073000000000000000000
+  Views:
+    collapsed: false
+  Width: 1600
+  X: 60
+  Y: 60
+

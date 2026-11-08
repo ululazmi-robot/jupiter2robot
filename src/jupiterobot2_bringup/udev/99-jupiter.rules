@@ -1,0 +1,50 @@
+# Jupiter 2 stable device symlinks.
+#
+# WHY THIS EXISTS
+# /dev/ttyUSB0 and /dev/ttyUSB1 are assigned in USB enumeration order, which
+# changes across reboots and whenever a device is unplugged. On this chassis the
+# CP2102 (RPLidar) and the FTDI FT232H (AX-12A head servo) regularly swap:
+# jupiterobot2_lidar.launch.py once hardcoded /dev/ttyUSB1 and therefore opened
+# the HEAD SERVO's bus instead of the lidar. Nothing errored -- the lidar just
+# sat silent while the head bus was held.
+#
+# Matching on VID:PID is the fix. The FTDI and CP2102 cannot be confused because
+# their vendor IDs differ (0403 vs 10c4), and unlike a serial number this does
+# not depend on a particular board.
+#
+# INSTALL
+#   sudo cp 99-jupiter.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules
+#   sudo udevadm trigger
+#   ls -l /dev/jupiter/
+#
+# You must unplug/replug (or trigger) for existing devices to pick up the new
+# symlinks. The symlinks live in /dev/jupiter/ so they cannot collide with
+# anything else.
+
+# --- RPLidar on the Silicon Labs CP2102 (10c4:ea60) -------------------------
+SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", \
+  SYMLINK+="jupiter/lidar", MODE="0666", GROUP="dialout"
+
+# --- AX-12A head servo on the FTDI FT232H (0403:6014) -----------------------
+# 6014 is the FT232H in its default configuration; if yours enumerates as a
+# different FTDI product id, copy the value from `lsusb` and adjust here.
+#
+# latency_timer=1 is a MAJOR performance fix, not a tweak. The FTDI driver
+# batches received bytes and only hands them to the tty after
+# latency_timer milliseconds. Default is 16 ms, which means EVERY serial
+# transaction costs 16 ms regardless of baud rate -- the AX-12 itself answers in
+# 0.5 ms (measured). At 16 ms a read cycle of 5 registers took 96 ms and
+# head_node could only reach 10 Hz while configured for 20 Hz. Setting it to 1
+# removes that floor.
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", \
+  SYMLINK+="jupiter/head", MODE="0666", GROUP="dialout", \
+  ATTR{device/latency_timer}="1"
+
+# --- SO-100 arm on the CH340 (1a86:55d3) ------------------------------------
+SUBSYSTEM=="tty", ATTRS{idVendor}=="1a86", ATTRS{idProduct}=="55d3", \
+  SYMLINK+="jupiter/arm", MODE="0666", GROUP="dialout"
+
+# --- ROBOTIS OpenCR base (0483:5740, STM32 CDC) -----------------------------
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", \
+  SYMLINK+="jupiter/base", MODE="0666", GROUP="dialout"

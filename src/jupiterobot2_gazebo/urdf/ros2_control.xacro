@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<!-- The Gazebo plugin that loads ros2_control. Nothing else.
+
+WHAT THIS FILE DOES NOT CONTAIN
+No <ros2_control> element. The joints and the hardware plugin are declared once
+in urdf/hardware.xacro, which is backend-agnostic. If you add a second
+<ros2_control> block here, Gazebo will bind every joint to whichever one it
+parses first and silently drop writes aimed at the other. That exact bug made
+head_joint report "active" while ignoring every command.
+
+WHY THE PLUGIN IS SEPARATE FROM THE SYSTEM
+This element is only meaningful inside Gazebo: libgazebo_ros2_control.so is
+loaded by gzserver. hardware.xacro has to be loadable without Gazebo (real
+robot, fake hardware on a desktop), so the two cannot live in the same file.
+
+PLUGIN PARAMETERS
+<parameters> is injected by launch/gazebo.launch.py through $JUPITER_GZ_PARAMS,
+read at xacro expansion time. The literal default is REQUIRED: without it,
+expanding this file outside that launch dies with "environment variable is not
+set". $(optenv) cannot nest a $(find), which is why the default is a path rather
+than a package reference.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <!-- robot_param must name a REAL node holding robot_description. Leaving
+           it empty makes the plugin call get_parameters with an empty name,
+           which fails and takes Gazebo down with it (exit 255). -->
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>$(optenv JUPITER_GZ_PARAMS /opt/ros/humble/share/jupiterobot2_gazebo/config/controllers.yaml)</parameters>
+    </plugin>
+  </gazebo>
+
+</robot>

@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!-- Surface properties: friction, contact stiffness, and Gazebo materials.
+
+ONE BLOCK PER LINK. This is the file that used to cause the problem.
+
+The old pair of xacros declared a <gazebo reference="caster_back_left_link">
+block twice: once with mu1/mu2 = 0.0 (the right value - a caster must slide)
+and once with 0.01. Gazebo's fixed-joint reduction does not merge them, it
+overwrites, and it warned every startup:
+
+    multiple inconsistent <mu> exists due to fixed joint reduction
+    overwriting previous value [0] with [0.01]
+
+Same story for self_collide on the wheel links. The values kept below are from
+the block that was declared FIRST, which is the one that won before the merge,
+so the robot's behaviour does not change. If a future change needs different
+friction, edit the single block here - do not add a second one.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <gazebo reference="base_link">
+    <material>Gazebo/Black</material>
+  </gazebo>
+
+  <!-- Drive wheels: high friction, they have to grip. -->
+  <gazebo reference="wheel_left_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1e6</kp>
+    <kd>1e3</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>1.0</maxVel>
+    <material>Gazebo/FlatBlack</material>
+  </gazebo>
+
+  <gazebo reference="wheel_right_link">
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <kp>1e6</kp>
+    <kd>1e3</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>1.0</maxVel>
+    <material>Gazebo/FlatBlack</material>
+  </gazebo>
+
+  <!-- Casters: mu 0 so they slide instead of dragging the robot off course. -->
+  <gazebo reference="caster_back_right_link">
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+    <kp>1e6</kp>
+    <kd>1e3</kd>
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <gazebo reference="caster_back_left_link">
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+    <kp>1e6</kp>
+    <kd>1e3</kd>
+    <material>Gazebo/Grey</material>
+  </gazebo>
+
+  <!-- Tower structure -->
+  <gazebo reference="plate_1_link"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="plate_2_link"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="plate_3_link"><material>Gazebo/Black</material></gazebo>
+  <gazebo reference="pipe_200_link"><material>Gazebo/BlackTransparent</material></gazebo>
+  <gazebo reference="pipe_300_link"><material>Gazebo/BlackTransparent</material></gazebo>
+  <gazebo reference="cables_link"><material>Gazebo/BlackTransparent</material></gazebo>
+
+  <!-- Upper deck fittings -->
+  <gazebo reference="arrow_link"><material>Gazebo/White</material></gazebo>
+  <gazebo reference="mic_link"><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="estop_link"><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="monitor_frame_1_link"><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="monitor_frame_2_link"><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="monitor_link"><material>Gazebo/FlatBlack</material></gazebo>
+  <gazebo reference="screen_link"><material>Gazebo/WhiteGlow</material></gazebo>
+
+  <!-- Mounting brackets -->
+  <gazebo reference="arm_mount_link"><material>Gazebo/DarkGrey</material></gazebo>
+  <gazebo reference="head_mount_link"><material>Gazebo/DarkGrey</material></gazebo>
+
+  <!-- camera_01_link and camera_02_link are NOT listed here. Their material and
+       collision settings live in urdf/sensors/cameras.xacro, inside the same
+       <gazebo> block as their depth sensor, so each camera link has exactly one
+       block. Putting material here as well would reintroduce the duplicate. -->
+
+</robot>

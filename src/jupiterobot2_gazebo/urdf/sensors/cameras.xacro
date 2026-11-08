@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!-- Head camera (camera_01) and base camera (camera_02) as Gazebo depth
+sensors.
+
+WHY BOTH ARE HERE NOW
+camera_01 only ever had a working plugin: in jupiter2_gazebo_multi_camera.xacro
+it used libgazebo_ros_camera.so. camera_02's plugin was commented out entirely
+and still pointed at libgazebo_ros_openni_kinect.so, which is a ROS 1 plugin
+that does not exist in Humble. So in the old setup camera_02 published nothing
+and /camera/* came from camera_01 only.
+
+Both now use libgazebo_ros_camera.so. If you only want ONE camera topic tree,
+comment out the camera_02 block - do not give both the same <camera_name>, or
+they will publish conflicting /camera/color/image_raw.
+
+Topic layout per camera: /<camera_name>/color/image_raw, /color/camera_info,
+/depth/camera_info, /points. With camera_01's camera_name "camera", that is
+/camera/color/image_raw etc., which is what astra.launch.xml and the vision
+nodes in this repo already expect.
+-->
+<robot xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:arg name="camera_visual" default="false"/>
+
+  <!-- ============ camera_01: head camera ============ -->
+  <gazebo reference="camera_01_link">
+    <!-- Mount geometry lives in jupiterobot2_head_description; this block owns
+         everything Gazebo-specific about the camera, including its appearance.
+         One block per link: do not add a second <gazebo reference="camera_01_link">
+         anywhere else, or fixed-joint reduction will start overwriting again.
+
+         selfCollide MUST MATCH camera_02_link BELOW.
+         Both cameras are welded to the same rigid body by fixed joints
+         (camera_01 via head_plate_link, camera_02 via plate_1_link, both
+         ancestors of base_link). Gazebo lumps them together during fixed-joint
+         reduction, so two different self_collide values collide and it warns:
+             multiple inconsistent <self_collide> ... overwriting [0] with [1]
+         false is the value that wins (the last one wins), so false is what the
+         robot actually ran with. Setting both to false makes that explicit
+         instead of accidental. Self-collision between a camera and its own
+         bracket is meaningless anyway. -->
+    <material>Gazebo/DarkGrey</material>
+    <selfCollide>false</selfCollide>
+    <gravity>true</gravity>
+    <sensor type="depth" name="camera_01">
+      <always_on>true</always_on>
+      <visualize>$(arg camera_visual)</visualize>
+      <update_rate>20.0</update_rate>
+      <camera>
+        <horizontal_fov>1.0472</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <depth_camera></depth_camera>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <ros>
+          <remapping>image_raw:=color/image_raw</remapping>
+          <remapping>camera_info:=color/camera_info</remapping>
+        </ros>
+        <camera_name>camera</camera_name>
+        <frame_name>camera_01_depth_optical_frame</frame_name>
+        <min_depth>0.05</min_depth>
+        <max_depth>8.0</max_depth>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- ============ camera_02: Astra Pro on plate_1 ============ -->
+  <gazebo reference="camera_02_link">
+    <material>Gazebo/DarkGrey</material>
+    <selfCollide>false</selfCollide>
+    <gravity>true</gravity>
+    <sensor type="depth" name="camera_02">
+      <always_on>true</always_on>
+      <visualize>$(arg camera_visual)</visualize>
+      <update_rate>20.0</update_rate>
+      <camera>
+        <horizontal_fov>1.0472</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <depth_camera></depth_camera>
+        <clip>
+          <near>0.05</near>
+          <far>8.0</far>
+        </clip>
+      </camera>
+      <plugin name="camera_controller_02" filename="libgazebo_ros_camera.so">
+        <ros>
+          <remapping>image_raw:=camera_02/color/image_raw</remapping>
+          <remapping>camera_info:=camera_02/color/camera_info</remapping>
+        </ros>
+        <camera_name>camera_02</camera_name>
+        <frame_name>camera_02_depth_optical_frame</frame_name>
+        <min_depth>0.05</min_depth>
+        <max_depth>8.0</max_depth>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+</robot>
